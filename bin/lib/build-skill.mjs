@@ -399,15 +399,9 @@ async function writeSkill({
 	}
 
 	const skillTemplate = await readText(templatePath);
-	const releaseList = RELEASE_NOTE_FILES.map(
-		(fileName) =>
-			`- \`release-notes/${fileName}\` - ${AREA_TITLES[fileName]}`
-	).join('\n');
-
 	const skillMarkdown = renderTemplate(skillTemplate, {
 		skill_name: skillSlug,
 		wordpress_version: version,
-		release_note_file_list: releaseList,
 		generated_at: new Date().toISOString().slice(0, 10),
 	}).trim();
 

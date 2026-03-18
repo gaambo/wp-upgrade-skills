@@ -26,7 +26,9 @@ Use this skill when a user needs an upgrade audit, migration plan, or compatibil
    - Dependency management files (for example: `composer.json`, lockfiles)
 5. If local WP environment tooling exists, include required version bump steps for WordPress {{wordpress_version}}.
 6. If WordPress is managed via Composer, include required `composer.json` and lockfile update steps.
-7. Start with the most relevant release-note files only.
+7. Use the release-note files shipped with this skill.
+    - Release notes live in `./release-notes/` (relative to this `SKILL.md`), not in the user's project repo.
+    - When referencing or reading a note, treat paths as relative to this `SKILL.md`.
 8. Expand to additional files only when findings require it.
 9. Produce one primary output: upgrade checklist, TODO list, issue list, or patch recommendations.
 
@@ -39,11 +41,11 @@ Use this skill when a user needs an upgrade audit, migration plan, or compatibil
 
 ## Progressive disclosure routing
 
-- Read first for all audits: `release-notes/breaking-changes.md`, `release-notes/deprecated.md`
-- If plugin-heavy backend code: `release-notes/core-api.md`, `release-notes/admin.md`, `release-notes/tooling.md`
-- If theme/rendering focus: `release-notes/frontend.md`, `release-notes/editor.md`, `release-notes/performance.md`
-- If schema/query/storage touched: `release-notes/database.md`
-- Only read remaining files when the repo indicates impact.
+- Read first for all audits: `./release-notes/breaking-changes.md`, `./release-notes/deprecated.md`
+- If plugin-heavy backend code: `./release-notes/core-api.md`, `./release-notes/admin.md`, `./release-notes/tooling.md`
+- If theme/rendering focus: `./release-notes/frontend.md`, `./release-notes/editor.md`, `./release-notes/performance.md`
+- If schema/query/storage touched: `./release-notes/database.md`
+- Only read remaining files inside `./release-notes/` when the repo indicates impact.
 
 ## Evidence and uncertainty handling
 
@@ -56,10 +58,6 @@ Use this skill when a user needs an upgrade audit, migration plan, or compatibil
 - For research/plan mode: focus on checklists, impact analysis, risk ranking, migration sequencing, and test plan.
 - For implementation mode: provide concrete code-level patch recommendations and verification steps.
 - When running in GitHub PR automation, use subagent findings to produce PR-ready issue/checklist/patch summaries suitable for a PR description or review comment.
-
-## Available files
-
-{{release_note_file_list}}
 
 ## Output requirements
 
