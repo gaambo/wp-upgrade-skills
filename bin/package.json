@@ -1,8 +1,9 @@
 {
 	"name": "wp-upgrade-skills-builder",
 	"version": "0.1.0",
-	"private": true,
+	"private": false,
 	"type": "module",
+	"license": "GPL-3.0-or-later",
 	"description": "Build scripts for generating WordPress upgrade Agent Skills.",
 	"scripts": {
 		"generate": "node make-release-notes.mjs",
