@@ -1,0 +1,5 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	// Keep generation cheap + fast for summarize/combine steps.
+	"model": "github-copilot/gpt-5-mini",
+}

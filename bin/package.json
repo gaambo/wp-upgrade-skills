@@ -1,0 +1,26 @@
+{
+	"name": "wp-upgrade-skills-builder",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"description": "Build scripts for generating WordPress upgrade Agent Skills.",
+	"scripts": {
+		"generate": "node make-release-notes.mjs",
+		"validate": "node validate-skills.mjs",
+		"format": "prettier --write . && prettier --write ../README.md ../AGENTS.md",
+		"format:check": "prettier --check . && prettier --check ../README.md ../AGENTS.md"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"prettier": "@wordpress/prettier-config",
+	"dependencies": {
+		"defuddle": "^0.14.0",
+		"fast-xml-parser": "^4.5.3",
+		"jsdom": "^26.1.0"
+	},
+	"devDependencies": {
+		"@wordpress/prettier-config": "^4.41.0",
+		"prettier": "^3.8.1"
+	}
+}
