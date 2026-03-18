@@ -79,10 +79,49 @@ async function validateSkill(skillDirPath, skillDirName) {
 		);
 	}
 
+	if (!skillMd.includes('## Source provenance')) {
+		throw new Error('Missing source provenance section in SKILL.md');
+	}
+	if (!skillMd.includes('make.wordpress.org/core')) {
+		throw new Error(
+			'Missing official WordPress Core source attribution in SKILL.md'
+		);
+	}
+
 	for (const fileName of RELEASE_NOTE_FILES) {
 		const filePath = path.join(releaseNotesDir, fileName);
 		if (!(await fileExists(filePath))) {
 			throw new Error(`Missing required release note file: ${fileName}`);
+		}
+
+		await validateReleaseNoteSources(filePath, fileName);
+	}
+}
+
+async function validateReleaseNoteSources(filePath, fileName) {
+	const note = await fs.readFile(filePath, 'utf8');
+	const trimmed = note.trim();
+	if (!trimmed) {
+		throw new Error(`Release note file is empty: ${fileName}`);
+	}
+
+	if (!trimmed.includes('## ')) {
+		return;
+	}
+
+	const sections = trimmed.split(/^##\s+/m).slice(1);
+	for (const rawSection of sections) {
+		const section = `## ${rawSection}`;
+		if (!section.includes('- Sources:')) {
+			throw new Error(
+				`Release note item missing Sources block in ${fileName}`
+			);
+		}
+
+		if (!/https:\/\/make\.wordpress\.org\/core\//.test(section)) {
+			throw new Error(
+				`Release note item missing official WordPress source URL in ${fileName}`
+			);
 		}
 	}
 }

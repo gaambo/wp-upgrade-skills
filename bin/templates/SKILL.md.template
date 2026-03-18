@@ -7,6 +7,12 @@ description: Audit a codebase for WordPress {{wordpress_version}} upgrade risks 
 
 Use this skill when a user needs an upgrade audit, migration plan, or compatibility review for WordPress {{wordpress_version}}.
 
+## Source provenance
+
+- These release notes are derived from official WordPress Core dev notes and field guides published on `make.wordpress.org/core`.
+- Thank the WordPress contributors and writers for the original release writeups these upgrade notes are built on.
+- Treat source URLs as required evidence for every finding; if a finding has no source, mark it incomplete instead of presenting it as settled.
+
 ## Workflow
 
 1. Determine project scope first:
@@ -60,7 +66,7 @@ Use this skill when a user needs an upgrade audit, migration plan, or compatibil
 - Keep findings actionable and code-searchable.
 - Prioritize breaking changes and deprecations.
 - Reference release-note file paths for each finding.
-- Include source URLs from the release-note entries when helpful.
+- Include source URLs from the release-note entries for every finding.
 - Preserve and cite relevant Trac/GitHub ticket links when present.
 - Suggest concrete patches or tests where possible.
 

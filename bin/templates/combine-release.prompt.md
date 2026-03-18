@@ -56,6 +56,7 @@ Continue for all required files.
 
 - Deduplicate equivalent changes across summaries.
 - Merge source URLs for deduplicated items.
+- Keep a `Sources` block for every reported item with at least one original `make.wordpress.org/core` URL.
 - Merge and deduplicate related Trac/GitHub ticket links for each item.
 - Assign each item to one primary area/file.
 - Prioritize `breaking-change` visibility and clarity.
