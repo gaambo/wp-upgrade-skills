@@ -13,11 +13,23 @@ This repository builds skills like `skills/update-to-wordpress-6-9/` from offici
 
 ### Via NPX
 
-Install from a repository with a Skills CLI that supports GitHub sources:
+Install from a repository with the [Skills CLI (`vercel-labs/skills`)](https://github.com/vercel-labs/skills) that supports GitHub sources:
 
 ```bash
-npx skills add gaambo/<repo-name>
+npx skills add gaambo/wp-upgrade-skills
 ```
+
+Update installed skills:
+
+```bash
+# Check if updates are available
+npx skills check
+
+# Update all installed skills
+npx skills update
+```
+
+Learn more: [https://github.com/vercel-labs/skills](https://github.com/vercel-labs/skills)
 
 ### Manual installation:
 
