@@ -7,6 +7,7 @@ This repository builds skills like `skills/update-to-wordpress-6-9/` from offici
 ## Available skills
 
 - `update-to-wordpress-6-9` - published skill for auditing WordPress 6.9 upgrade
+- `update-to-wordpress-7-0` - published skill for auditing WordPress 7.0 upgrade
 - Future generated skills follow the same `update-to-wordpress-x-y` naming pattern under `skills/`
 
 ## Install and use the skills
