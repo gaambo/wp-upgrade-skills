@@ -16,9 +16,7 @@
 	},
 	"prettier": "@wordpress/prettier-config",
 	"dependencies": {
-		"defuddle": "^0.14.0",
-		"fast-xml-parser": "^4.5.3",
-		"jsdom": "^26.1.0"
+		"fast-xml-parser": "^5.8.0"
 	},
 	"devDependencies": {
 		"@wordpress/prettier-config": "^4.41.0",

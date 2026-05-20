@@ -1,8 +1,6 @@
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { XMLParser } from 'fast-xml-parser';
-import { JSDOM } from 'jsdom';
-import { Defuddle } from 'defuddle/node';
 import { AREA_TITLES, BUILD_ROOT, RELEASE_NOTE_FILES } from './config.mjs';
 import {
 	cleanDir,
@@ -265,7 +263,10 @@ function normalizeFeedItem(item, version) {
 }
 
 async function extractMarkdownFromArticle(url) {
-	const response = await fetch(url, {
+	const markdownUrl = new URL(url);
+	markdownUrl.searchParams.set('output_format', 'markdown');
+
+	const response = await fetch(markdownUrl, {
 		headers: {
 			'user-agent': 'wp-upgrade-skills-builder/0.1',
 		},
@@ -273,27 +274,18 @@ async function extractMarkdownFromArticle(url) {
 
 	if (!response.ok) {
 		throw new Error(
-			`Failed to fetch source article: HTTP ${response.status} ${url}`
+			`Failed to fetch source article markdown: HTTP ${response.status} ${markdownUrl}`
 		);
 	}
 
-	const html = await response.text();
-	const dom = new JSDOM(html, { url });
-	const preferredNode = dom.window.document.querySelector('article.post');
-
-	if (!preferredNode) {
-		log(
-			`No article.post found for ${url}. Falling back to Defuddle auto-detection.`
+	const contentType = response.headers.get('content-type') || '';
+	if (!contentType.toLowerCase().includes('markdown')) {
+		throw new Error(
+			`Unexpected content type for source article markdown: ${contentType || '(missing)'} ${markdownUrl}`
 		);
 	}
 
-	const parsed = await Defuddle(dom.window.document, url, {
-		markdown: true,
-		useAsync: false,
-		contentSelector: preferredNode ? 'article.post' : undefined,
-	});
-
-	const markdown = String(parsed.content || '').trim();
+	const markdown = String(await response.text()).trim();
 	if (!markdown) {
 		throw new Error(`No markdown extracted from source article ${url}`);
 	}
