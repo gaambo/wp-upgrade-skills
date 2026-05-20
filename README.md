@@ -51,7 +51,7 @@ The generated skill starts with breaking changes and deprecations, then expands 
 
 - Discovers release posts from the official Core versioned dev-notes feed (example: `https://make.wordpress.org/core/tag/dev-notes-6-9/feed/`)
 - Uses all items from that release-specific dev-notes feed as source inputs and also checks the release tag feed for field-guide posts
-- Fetches each source article and converts it to markdown programmatically via `defuddle`
+- Fetches each source article directly as markdown via WordPress Core's `output_format=markdown` response
 - Stores raw extracted article markdown only in `.build/` (temporary artifacts)
 - Runs one AI summarization call per source article
 - Runs a final AI combine/deduplicate pass across all summaries

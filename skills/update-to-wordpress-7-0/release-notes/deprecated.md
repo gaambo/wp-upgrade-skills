@@ -1,19 +1,17 @@
 # Deprecated
 
-## state.navigation (hasStarted / hasFinished) in core/router is deprecated
+## state.navigation properties in core/router are deprecated
 
 - Type: deprecation
 - Severity: medium
 - Applies To: multiple
-- Summary: Accessing `state.navigation` on the `core/router` store (notably `hasStarted` and `hasFinished`) is deprecated in 7.0 and will emit console warnings in development (SCRIPT_DEBUG). Direct access will stop working in a future release.
+- Summary: Accessing `state.navigation` (notably `state.navigation.hasStarted` and `state.navigation.hasFinished`) from the `core/router` store is deprecated in 7.0 and will emit development console warnings. Direct access may be removed in a future release.
 - Search For:
-    - store( 'core/router' )
-    - state.navigation
-    - hasStarted
-    - hasFinished
+    - `store( 'core/router' ).state.navigation`
+    - `state.navigation.hasStarted`
+    - `state.navigation.hasFinished`
 - Recommended Action:
-    - Remove or replace code that reads `state.navigation` (hasStarted/hasFinished). Plan to adopt the official navigation API when released (7.1).
-    - Add guards to avoid relying on internal properties and remove dev-only workarounds.
+    - Stop reading `state.navigation` and remove code that relies on `hasStarted`/`hasFinished`. Replace with supported public navigation APIs when available, or use feature-detection/shims and test dev builds (`SCRIPT_DEBUG=1`) to locate warnings.
 - Related Tickets:
     - https://github.com/WordPress/gutenberg/pull/70882
 - Sources:

@@ -68,4 +68,4 @@ Use this skill when a user needs an upgrade audit, migration plan, or compatibil
 - Preserve and cite relevant Trac/GitHub ticket links when present.
 - Suggest concrete patches or tests where possible.
 
-_Generated: 2026-04-15_
+_Generated: 2026-05-20_

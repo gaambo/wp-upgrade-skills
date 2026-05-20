@@ -1,18 +1,18 @@
 # Tooling
 
-## Gutenberg plugin (22.6) will enforce iframe for classic themes to collect compatibility feedback
+## wordpress/wp-ai-client package behavior on 7.0 — PHP SDK disabled, REST/JS remain
 
-- Type: behavior-change
+- Type: tooling
 - Severity: low
-- Applies To: plugin | theme | site
-- Summary: The Gutenberg plugin (starting with v22.6) will enforce the post editor iframe for classic themes to collect compatibility feedback on blocks (not enforced in WordPress 7.0 core).
+- Applies To: plugin
+- Summary: The `wordpress/wp-ai-client` package auto-detects WP 7.0+ and disables its own PHP SDK parts (Core now provides them) while continuing to expose REST endpoints and the JavaScript client. The package may be discontinued and REST/JS behavior moved upstream.
 - Search For:
-    - "Gutenberg 22.6"
-    - "iframe enforced for classic themes"
+    - `wordpress/wp-ai-client`
+    - `UPGRADE.md`
 - Recommended Action:
-    - Test blocks with Gutenberg 22.6 in classic themes and report any breakages so maintainers can provide guidance or fixes.
-    - Collect reproduction steps for blocks that fail under an iframed editor.
+    - If you relied only on the PHP SDK, remove the package when requiring WP 7.0+. If you need the REST endpoints or the JS client, keep the package for now and track upstream changes; plan to migrate when functionality is moved to Gutenberg/Core.
 - Related Tickets:
-    - https://core.trac.wordpress.org/ticket/75475
+    - https://github.com/WordPress/wp-ai-client/blob/trunk/UPGRADE.md
+    - https://make.wordpress.org/core/2026/02/03/proposal-for-merging-wp-ai-client-into-wordpress-7-0/
 - Sources:
-    - https://make.wordpress.org/core/2026/02/24/iframed-editor-changes-in-wordpress-7-0/
+    - https://make.wordpress.org/core/2026/03/24/introducing-the-ai-client-in-wordpress-7-0/

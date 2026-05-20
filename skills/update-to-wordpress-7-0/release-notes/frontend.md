@@ -1,58 +1,56 @@
 # Frontend
 
-## Viewport-based visibility hides blocks with CSS (blocks still render in DOM)
+## Viewport-hidden blocks are rendered in the DOM and hidden with CSS (not removed)
 
 - Type: behavior-change
 - Severity: medium
 - Applies To: multiple
-- Summary: Blocks hidden by the new viewport visibility rules (mobile/tablet/desktop) are rendered into the page HTML and hidden via CSS; they are not removed from the DOM. This differs from the previous `blockVisibility: false` behavior that prevented server-side rendering.
+- Summary: Blocks hidden for specific viewports are now rendered into the DOM and hidden via CSS (when `blockVisibility` is an object with `viewport` keys). This differs from `blockVisibility: false` which prevents server-side rendering.
 - Search For:
+    - `<!-- wp:paragraph {"metadata":{"blockVisibility":{"viewport":{"mobile":false}}}} -->`
     - `blockVisibility: false`
-    - has-custom-css (related)
+    - front-end DOM/CSS hiding patterns
 - Recommended Action:
-    - Audit code or integrations that relied on blocks being absent from rendered HTML (server-side checks, front-end scripts, structured data/SEO).
-    - If a block must be completely removed from output, use `blockVisibility: false`.
-    - Adjust front-end JS/CSS selectors to account for elements that may be present but visually hidden.
+    - Audit themes, caching, server-side renderers, scrapers and accessibility checks that assumed hidden blocks were absent. If content must be excluded for SEO or non-visual contexts, continue using `blockVisibility: false`. Update CSS/JS selectors and integration tests to account for CSS-hidden DOM nodes.
 - Related Tickets:
     - https://github.com/WordPress/gutenberg/issues/73776
     - https://github.com/WordPress/gutenberg/issues/72502
+    - https://github.com/WordPress/gutenberg/issues/75707
 - Sources:
     - https://make.wordpress.org/core/2026/03/15/block-visibility-in-wordpress-7-0/
 
-## Per-instance CSS stored and injected with generated instance class and global stylesheet
-
-- Type: new-feature
-- Severity: high
-- Applies To: theme | plugin | site
-- Summary: Per-instance Custom CSS is serialized into the block `style.css` attribute. A unique hashed class (`wp-custom-css-<hash>`) and `has-custom-css` are added to the block root; a site-level stylesheet (`id="wp-block-custom-css"`) is registered so instance rules are scoped and load after Global Styles. Server-rendered blocks must render a standard outermost element for injection to work.
-- Search For:
-    - `"style":{"css":`
-    - has-custom-css
-    - wp-custom-css- and id="wp-block-custom-css"
-    - WP_HTML_Tag_Processor
-- Recommended Action:
-    - For server-rendered blocks ensure the block outputs a reliable outermost HTML element for the injector to attach the hashed class.
-    - Audit code that reads/mutates `style` attributes to handle the new `css` key.
-    - Test for selector collisions, caching, and stylesheet id conflicts; ensure correct specificity ordering.
-- Related Tickets:
-    - https://github.com/WordPress/gutenberg/issues/56127
-    - https://github.com/WordPress/gutenberg/pull/73959
-- Sources:
-    - https://make.wordpress.org/core/2026/03/15/custom-css-for-individual-block-instances-in-wordpress-7-0/
-
-## Overlays render full-screen only in this release
+## Default removal of "Posts by Author" title attributes for author archive links
 
 - Type: behavior-change
-- Severity: low
-- Applies To: theme, site
-- Summary: Initial implementation of navigation overlays renders them full-screen only. Dialog-based (non-full-screen) overlays and click-outside-to-close behavior are not supported in 7.0.
+- Severity: medium
+- Applies To: multiple
+- Summary: `the_author_posts_link()` and `wp_list_authors()` no longer output the "Posts by Author" title attribute by default in 7.0. `the_author_posts_link` filter now receives `$link, $author, $title` for reconstruction.
 - Search For:
-    - full-screen
-    - <dialog>
-    - clicking outside to close
+    - `the_author_posts_link`
+    - `add_filter( 'the_author_posts_link'`
+    - `wp_list_authors(`
+    - `title="Posts by`
 - Recommended Action:
-    - Do not design themes that rely on non-full-screen overlay behavior until dialog-based overlays are implemented; plan to update styles when support is added.
+    - Update themes/plugins that relied on title attributes to use visible text or ARIA attributes. Restore prior behavior via `the_author_posts_link` filter (3 args) or adjust parsing of `wp_list_authors` output.
 - Related Tickets:
-    - https://github.com/WordPress/gutenberg/issues/61297
+    - https://core.trac.wordpress.org/ticket/62835
 - Sources:
-    - https://make.wordpress.org/core/2026/03/04/customisable-navigation-overlays-in-wordpress-7-0/
+    - https://make.wordpress.org/core/2026/05/14/removing-title-attributes-in-author-link-functions/
+
+## Paragraph selector behaviour for text-indent (subsequent vs all)
+
+- Type: behavior-change
+- Severity: medium
+- Applies To: theme
+- Summary: Core paragraph `typography.textIndent` supports a `subsequent` selector (`.wp-block-paragraph + .wp-block-paragraph`) by default; setting `all` uses `.wp-block-paragraph`. This setting is configurable in `theme.json`.
+- Search For:
+    - `settings.typography.textIndent` in theme.json
+    - `styles.blocks."core/paragraph".typography.textIndent`
+    - `.wp-block-paragraph + .wp-block-paragraph`
+    - `.wp-block-paragraph`
+- Recommended Action:
+    - Theme authors should set `settings.typography.textIndent` to `subsequent` or `all` as appropriate and test LTR/RTL languages. Audit theme CSS that targets `.wp-block-paragraph` for conflicts and adjust specificity if needed.
+- Related Tickets:
+    - https://github.com/WordPress/gutenberg/pull/74889
+- Sources:
+    - https://make.wordpress.org/core/2026/03/15/new-block-support-text-indent-textindent/

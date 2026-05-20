@@ -1,3 +1,3 @@
 # Performance
 
-No performance-specific items were reported for this release.
+No entries for WordPress 7.0 that directly affect performance were reported in the provided summaries.

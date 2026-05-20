@@ -1,21 +1,18 @@
 # Core API
 
-## Breadcrumbs block exposes filters to customize trail items and taxonomy selection
+## New filter `block_core_breadcrumbs_items` to modify breadcrumb items
 
 - Type: new-feature
 - Severity: low
 - Applies To: multiple
-- Summary: Breadcrumbs block adds filters `block_core_breadcrumbs_items` and `block_core_breadcrumbs_post_type_settings` to modify items and select taxonomy/term preferences. Item arrays support `label`, optional `url`, and optional `allow_html` (sanitized with `wp_kses_post()` when true).
+- Summary: WordPress 7.0 adds `block_core_breadcrumbs_items` to allow modifying the Breadcrumbs block's rendered trail. Each item is an array with `label`, optional `url`, and optional `allow_html` (controls `wp_kses_post()` vs `esc_html()`).
 - Search For:
-    - block_core_breadcrumbs_items
-    - block_core_breadcrumbs_post_type_settings
-    - allow_html
-    - wp_kses_post
-    - esc_html
+    - `block_core_breadcrumbs_items`
+    - `allow_html`
+    - `wp_kses_post`
+    - `esc_html`
 - Recommended Action:
-    - Update plugins/themes that modify breadcrumb output to use `block_core_breadcrumbs_items`.
-    - When adding items, provide `label` and optional `url`; set `allow_html` only when safe.
-    - Use `block_core_breadcrumbs_post_type_settings` to pick taxonomy/term preferences and handle documented fallbacks.
+    - Search for custom breadcrumb implementations and use the filter to adjust breadcrumb items when appropriate. Only set `allow_html` for trusted markup and add tests where security or markup matters.
 - Related Tickets:
     - https://github.com/WordPress/gutenberg/pull/74169
     - https://github.com/WordPress/gutenberg/pull/73283
@@ -23,38 +20,37 @@
 - Sources:
     - https://make.wordpress.org/core/2026/03/04/breadcrumb-block-filters/
 
-## New watch() function in @wordpress/interactivity
+## New `watch()` helper in @wordpress/interactivity
 
 - Type: new-feature
-- Severity: low
+- Severity: medium
 - Applies To: multiple
-- Summary: `watch()` subscribes to reactive values accessed inside a callback and re-runs the callback when those values change. Returns an `unwatch()` cleanup function and supports per-run cleanup.
+- Summary: @wordpress/interactivity adds `watch()` which runs a callback immediately and re-runs it whenever any reactive value accessed inside changes. It returns `unwatch()` and supports cleanup functions.
 - Search For:
-    - watch(
-    - "from '@wordpress/interactivity'"
-    - unwatch()
-    - data-wp-watch
+    - `import { watch } from '@wordpress/interactivity'`
+    - `watch( () => { ... } )`
+    - `unwatch()`
+    - `data-wp-watch`
 - Recommended Action:
-    - Use `watch()` for side effects based on interactivity store values (analytics, syncing). Ensure you call `unwatch()` or return a cleanup to avoid leaks.
+    - Prefer `watch()` for observing reactive interactivity state (analytics, store-sync, side effects), add `unwatch()` cleanup to avoid leaks, and ensure build tooling includes the package.
 - Related Tickets:
     - https://github.com/WordPress/gutenberg/pull/75563
 - Sources:
     - https://make.wordpress.org/core/2026/02/23/changes-to-the-interactivity-api-in-wordpress-7-0/
+    - https://make.wordpress.org/core/2026/05/14/wordpress-7-0-field-guide/
 
-## core/router state.url is now initialized on the server
+## core/router state's `url` is now server-populated
 
 - Type: behavior-change
 - Severity: low
 - Applies To: multiple
-- Summary: `state.url` in the `core/router` store is populated during server-side directive processing rather than initialized from `window.location.href`. It will be present on first load and only change on the first client-side navigation.
+- Summary: The `core/router` store's `state.url` is now initialized on the server during directive processing, so it has a stable value on first render instead of being undefined until client code sets `window.location.href`.
 - Search For:
-    - state.url
-    - core/router
-    - "window.location.href"
-    - interactivity-router
+    - `store( 'core/router' ).state.url`
+    - `state.url`
+    - `window.location.href` (client-side initialization)
 - Recommended Action:
-    - Remove or adjust guards that assumed `state.url` was undefined on initial load.
-    - Use `watch()` on `core/router` `state.url` to detect client-side navigations reliably (e.g., for analytics).
+    - Remove guards expecting `state.url` to be undefined on first load. Combine `state.url` with `watch()` or navigation hooks to detect virtual navigations and test analytics to avoid duplicate/missed pageviews.
 - Related Tickets:
     - https://github.com/WordPress/wordpress-develop/pull/10944
 - Sources:
@@ -65,99 +61,100 @@
 - Type: new-feature
 - Severity: medium
 - Applies To: plugin
-- Summary: Client-side Abilities API split into `@wordpress/abilities` (standalone client store) and `@wordpress/core-abilities` (fetches/registers server abilities from `/wp-abilities/v1`). Modules load as ES modules and integrate with `core/abilities` store.
+- Summary: Two JS packages provide a client-side Abilities API. `@wordpress/abilities` offers registration/execution logic; `@wordpress/core-abilities` fetches server-registered abilities via `/wp-abilities/v1/` and registers them into the abilities store.
 - Search For:
-    - "@wordpress/abilities"
-    - "@wordpress/core-abilities"
-    - "wp_enqueue_script_module"
-    - registerAbility
-    - registerAbilityCategory
+    - `@wordpress/abilities`
+    - `@wordpress/core-abilities`
+    - `registerAbility` `registerAbilityCategory` `executeAbility`
 - Recommended Action:
-    - Enqueue the correct module: use `@wordpress/core-abilities` when server-registered abilities are needed; otherwise use `@wordpress/abilities`.
-    - Load as script modules or dynamic import and read abilities via `core/abilities` store.
-    - Ensure category slugs use lowercase alphanumeric with dashes.
+    - Enqueue or import `@wordpress/core-abilities` in admin pages that need server abilities. For client-only abilities, import `@wordpress/abilities`. Use the abilities store API (getAbilities, getAbilityCategories) or store integration (useSelect).
 - Related Tickets:
     - (none)
 - Sources:
     - https://make.wordpress.org/core/2026/03/24/client-side-abilities-api-in-wordpress-7-0/
+    - https://make.wordpress.org/core/2026/05/14/wordpress-7-0-field-guide/
 
-## executeAbility enforces JSON schemas, permission callbacks, and maps REST verbs from annotations
+## executeAbility enforces JSON Schema validation and permission checks
 
 - Type: behavior-change
 - Severity: medium
 - Applies To: plugin
-- Summary: `executeAbility` validates inputs/outputs against declared schemas and enforces permission callbacks; server-side abilities' HTTP methods are chosen from annotations (readonly → GET, destructive+idempotent → DELETE, otherwise POST). Validation failures throw specific error codes (`ability_invalid_input`, `ability_invalid_output`, `ability_permission_denied`).
+- Summary: Client-side execution validates inputs/outputs against declared JSON Schema (draft-04) and enforces permission checks. Failures return errors with codes `ability_invalid_input`, `ability_invalid_output`, or `ability_permission_denied`. REST method selection for server abilities is derived from annotations (`readonly` → GET, `destructive+idempotent` → DELETE, else POST).
 - Search For:
-    - executeAbility
-    - ability_invalid_input
-    - ability_invalid_output
-    - ability_permission_denied
-    - /wp-abilities/v1
-    - readonly, destructive, idempotent
+    - `ability_invalid_input` `ability_invalid_output` `ability_permission_denied`
+    - `input_schema` `output_schema` `permissionCallback` `meta.annotations.readonly`
 - Recommended Action:
-    - Declare accurate annotations and provide `input_schema`/`output_schema`.
-    - Catch and handle documented error codes in client calls.
-    - Verify behavior on admin pages where `@wordpress/core-abilities` is enqueued.
+    - Add JSON Schema definitions for abilities exposed to clients, test valid/invalid flows, catch and handle new error codes in client code, and verify HTTP method mappings for server abilities.
 - Related Tickets:
-    - (none)
+    - https://github.com/WordPress/ai/issues/346
+    - https://github.com/WordPress/gutenberg/pull/77029
 - Sources:
     - https://make.wordpress.org/core/2026/03/24/client-side-abilities-api-in-wordpress-7-0/
 
-## Connectors API and WP_Connector_Registry
+## Connectors API and public registry functions
 
 - Type: new-feature
 - Severity: medium
-- Applies To: plugin
-- Summary: Adds a Connectors API with a WP_Connector_Registry singleton created during `init` and helpers `wp_is_connector_registered()`, `wp_get_connector()`, `wp_get_connectors()`. Plugins must register via `wp_connectors_init` or use the public functions after `init`.
+- Applies To: plugin, site
+- Summary: A Connectors API includes a registry singleton and public functions (`wp_is_connector_registered()`, `wp_get_connector()`, `wp_get_connectors()`) available after `init`. Plugins can register or override connectors on `wp_connectors_init`.
 - Search For:
-    - wp_connectors_init
-    - WP_Connector_Registry
-    - wp_is_connector_registered
-    - wp_get_connector
-    - wp_get_connectors
+    - `wp_connectors_init`
+    - `wp_get_connector`
+    - `wp_get_connectors`
+    - `WP_Connector_Registry`
 - Recommended Action:
-    - Hook into `wp_connectors_init` to register/modify connectors. Do not interact with the registry before `init`.
+    - Use the public functions outside `init`; register/override connectors only during `wp_connectors_init` using registry methods.
 - Related Tickets:
     - (none)
 - Sources:
     - https://make.wordpress.org/core/2026/03/18/introducing-the-connectors-api-in-wordpress-7-0/
+    - https://make.wordpress.org/core/2026/05/14/wordpress-7-0-field-guide/
 
-## PHP-only blocks via register_block_type + supports.autoRegister
-
-- Type: new-feature
-- Severity: low
-- Applies To: multiple
-- Summary: Support for PHP-only blocks allows simple server-rendered blocks to be registered with `register_block_type` plus `supports.autoRegister` and a `render_callback`; the editor will surface Inspector Controls for supported attribute types.
-- Search For:
-    - register_block_type
-    - "autoRegister"
-    - "supports' => array( 'autoRegister' => true )"
-    - render_callback
-- Recommended Action:
-    - Use `register_block_type(..., [ 'render_callback' => ..., 'supports' => [ 'autoRegister' => true ] ])` for simple server-driven blocks.
-    - Verify attributes use supported types to get Inspector Controls.
-    - Continue using client-side registration for interactive blocks.
-- Related Tickets:
-    - https://core.trac.wordpress.org/ticket/64639
-- Sources:
-    - https://make.wordpress.org/core/2026/03/03/php-only-block-registration/
-
-## theme.json pseudo-class selectors for blocks and variations
+## New server-side AI API: wp_ai_client_prompt() and WP_AI_Client_Prompt_Builder
 
 - Type: new-feature
 - Severity: medium
-- Applies To: theme
-- Summary: `theme.json` supports `:hover`, `:focus`, `:focus-visible`, `:active` pseudo-class selectors inside `styles.blocks` for blocks and variations (theme.json-only API in 7.0; no Global Styles UI yet).
+- Applies To: plugin
+- Summary: WordPress 7.0 adds a provider-agnostic AI client and `wp_ai_client_prompt()` which returns a fluent `WP_AI_Client_Prompt_Builder` for text/image generation and metadata-rich results.
 - Search For:
-    - "theme.json"
-    - "styles.blocks"
-    - "variations"
-    - ":hover" ":focus" ":focus-visible" ":active"
+    - `wp_ai_client_prompt`
+    - `WP_AI_Client_Prompt_Builder`
+    - `generate_text()` `generate_images()` `generate_*_result()`
 - Recommended Action:
-    - Move supported interactive styles into `styles.blocks`/variation objects where appropriate and limit selectors to the supported list.
-    - Test block variations and ensure selector conflicts are avoided.
+    - Replace direct SDK calls with `wp_ai_client_prompt()`, handle `WP_Error` returns, and use `is_supported_for_*()` checks to gate UI.
+- Related Tickets:
+    - https://core.trac.wordpress.org/ticket/64591
+- Sources:
+    - https://make.wordpress.org/core/2026/03/24/introducing-the-ai-client-in-wordpress-7-0/
+    - https://make.wordpress.org/core/2026/05/14/wordpress-7-0-field-guide/
+
+## wp_ai_client_prevent_prompt filter can block prompts and change UI visibility
+
+- Type: behavior-change
+- Severity: medium
+- Applies To: plugin
+- Summary: The `wp_ai_client_prevent_prompt` filter can prevent prompts from executing; when prevented, no provider call is made, `is_supported_for_*()` returns false, and generation methods return a `WP_Error`.
+- Search For:
+    - `wp_ai_client_prevent_prompt`
+- Recommended Action:
+    - Check `is_supported_for_*()` before showing AI UI and handle `WP_Error` returns from generation methods; provide fallbacks and surface clear messaging when prompts are blocked.
+- Related Tickets:
+    - (none)
+- Sources:
+    - https://make.wordpress.org/core/2026/03/24/introducing-the-ai-client-in-wordpress-7-0/
+
+## theme.json supports pseudo-class selectors on blocks and variations
+
+- Type: new-feature
+- Severity: low
+- Applies To: theme
+- Summary: theme.json can declare interactive pseudo-class rules (`:hover`, `:focus`, `:focus-visible`, `:active`) for blocks and block style variations; other pseudo-selectors are ignored.
+- Search For:
+    - `theme.json "styles": { "blocks"`
+    - `":hover"` `":focus"` `":focus-visible"` `":active"`
+- Recommended Action:
+    - Add pseudo-state rules in theme.json for blocks that need interactive states and test editor and front-end rendering. Keep CSS fallbacks for unsupported selectors.
 - Related Tickets:
     - https://core.trac.wordpress.org/ticket/64263
-    - https://github.com/WordPress/gutenberg/issues/38277
 - Sources:
-    - https://make.wordpress.org/core/2026/03/09/pseudo-element-support-for-blocks-and-their-variations-in-theme.json/
+    - https://make.wordpress.org/core/2026/03/09/pseudo-element-support-for-blocks-and-their-variations-in-theme-json/
